@@ -72,7 +72,15 @@ class SettingsActivity : Activity() {
                 build(0)
             }
         }
-        list.addView(Ui.item(this, "GlassHome ${BuildConfig.VERSION_NAME}", sizeSp = 13f, widthDp = 580f) {}.apply { alpha = 0.6f })
+        list.addView(Ui.item(this, "GlassHome ${BuildConfig.VERSION_NAME}", sizeSp = 13f, widthDp = 580f) {}.apply {
+            alpha = 0.6f
+            // Hidden: hold OK here to open the baby monitor setup.
+            isLongClickable = true
+            setOnLongClickListener {
+                startActivity(android.content.Intent(this@SettingsActivity, CameraSetupActivity::class.java))
+                true
+            }
+        })
         list.getChildAt(focus.coerceIn(0, list.childCount - 1))?.requestFocus()
     }
 
