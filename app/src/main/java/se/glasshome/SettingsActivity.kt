@@ -17,6 +17,8 @@ class SettingsActivity : Activity() {
 
     private val rotations = listOf(30 to "Var 30:e minut", 60 to "Varje timme", 180 to "Var 3:e timme", 1440 to "En gång om dagen")
 
+    private val idleOptions = listOf(15 to "Efter 15 sekunder", 30 to "Efter 30 sekunder", 60 to "Efter 1 minut", 300 to "Efter 5 minuter", 0 to "Aldrig")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
@@ -33,7 +35,7 @@ class SettingsActivity : Activity() {
     private fun focusedIndex() = (0 until list.childCount).firstOrNull { list.getChildAt(it).hasFocus() } ?: 0
 
     private fun row(label: String, detail: String? = null, action: () -> Unit) {
-        list.addView(Ui.item(this, label, sizeSp = 19f, widthDp = 420f, detail = detail) {
+        list.addView(Ui.item(this, label, sizeSp = 19f, widthDp = 580f, detail = detail) {
             val i = focusedIndex()
             action()
             build(i)
@@ -45,15 +47,20 @@ class SettingsActivity : Activity() {
         if (Updater.available(this)) {
             row("Installera uppdatering", "1.0.${prefs.updateVersion}") { Updater.install(this) }
         }
-        row("Tavlor", Art.collections[prefs.collection.coerceIn(0, Art.collections.size - 1)].name) {
+        row("Bakgrund", Art.current(prefs).name) {
             prefs.collection = (prefs.collection + 1) % Art.collections.size
             nextPainting()
         }
-        row("Byt tavla nu") { nextPainting() }
+        row("Byt bild nu") { nextPainting() }
         val rot = rotations.firstOrNull { it.first == prefs.rotateMinutes } ?: rotations[1]
-        row("Byt tavla", rot.second) {
+        row("Byt bild", rot.second) {
             val i = rotations.indexOf(rot)
             prefs.rotateMinutes = rotations[(i + 1) % rotations.size].first
+        }
+        val idle = idleOptions.firstOrNull { it.first == prefs.idleSeconds } ?: idleOptions[1]
+        row("Dölj allt när fjärren inte används", idle.second) {
+            val i = idleOptions.indexOf(idle)
+            prefs.idleSeconds = idleOptions[(i + 1) % idleOptions.size].first
         }
         row("Väder", if (prefs.showWeather) "Visas" else "Dolt") { prefs.showWeather = !prefs.showWeather }
         row("Visa hemskärmen när TV:n startar", if (prefs.homeOnWake) "På" else "Av") { prefs.homeOnWake = !prefs.homeOnWake }
@@ -65,17 +72,17 @@ class SettingsActivity : Activity() {
                 build(0)
             }
         }
-        list.addView(Ui.item(this, "GlassHome ${BuildConfig.VERSION_NAME}", sizeSp = 13f, widthDp = 420f) {}.apply { alpha = 0.6f })
+        list.addView(Ui.item(this, "GlassHome ${BuildConfig.VERSION_NAME}", sizeSp = 13f, widthDp = 580f) {}.apply { alpha = 0.6f })
         list.getChildAt(focus.coerceIn(0, list.childCount - 1))?.requestFocus()
     }
 
     private fun nextPainting() {
-        Toast.makeText(this, "Hämtar en ny tavla…", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Hämtar en ny bild…", Toast.LENGTH_SHORT).show()
         Net.io.execute {
             val ok = try { Art.next(applicationContext) } catch (_: Exception) { false }
             runOnUiThread {
                 if (ok) Ui.showPainting(this, painting)
-                else Toast.makeText(this, "Kunde inte hämta tavlan just nu", Toast.LENGTH_SHORT).show()
+                else Toast.makeText(this, "Kunde inte hämta bilden just nu", Toast.LENGTH_SHORT).show()
             }
         }
     }

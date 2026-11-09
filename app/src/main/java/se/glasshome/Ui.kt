@@ -76,7 +76,15 @@ object Ui {
     fun showPainting(a: Activity, iv: ImageView) {
         val f = File(a.filesDir, "painting.jpg")
         if (f.exists() && f.length() > 0) {
-            val opts = BitmapFactory.Options().apply { inPreferredConfig = android.graphics.Bitmap.Config.RGB_565 }
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(f.absolutePath, bounds)
+            val screenW = maxOf(a.resources.displayMetrics.widthPixels, 1280)
+            var sample = 1
+            while (bounds.outWidth / (sample * 2) >= screenW) sample *= 2
+            val opts = BitmapFactory.Options().apply {
+                inPreferredConfig = android.graphics.Bitmap.Config.ARGB_8888
+                inSampleSize = sample
+            }
             val bmp = try { BitmapFactory.decodeFile(f.absolutePath, opts) } catch (_: Throwable) { null }
             if (bmp != null) {
                 iv.setImageBitmap(bmp)

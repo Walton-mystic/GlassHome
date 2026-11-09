@@ -19,6 +19,11 @@ class Prefs(ctx: Context) {
         get() = p.getBoolean("weather", true)
         set(v) = p.edit().putBoolean("weather", v).apply()
 
+    /** Seconds without remote input before everything fades out; 0 = never */
+    var idleSeconds: Int
+        get() = p.getInt("idleSeconds", 30)
+        set(v) = p.edit().putInt("idleSeconds", v).apply()
+
     var homeOnWake: Boolean
         get() = p.getBoolean("homeOnWake", true)
         set(v) = p.edit().putBoolean("homeOnWake", v).apply()
@@ -36,12 +41,12 @@ class Prefs(ctx: Context) {
         set(v) = p.edit().putInt("lastIndex", v).apply()
 
     var artCache: String
-        get() = p.getString("artCache", "") ?: ""
-        set(v) = p.edit().putString("artCache", v).apply()
+        get() = p.getString("artCache2", "") ?: ""
+        set(v) = p.edit().putString("artCache2", v).apply()
 
     var artCacheFor: Int
-        get() = p.getInt("artCacheFor", -1)
-        set(v) = p.edit().putInt("artCacheFor", v).apply()
+        get() = p.getInt("artCacheFor2", -1)
+        set(v) = p.edit().putInt("artCacheFor2", v).apply()
 
     var weatherCache: String
         get() = p.getString("weatherCache", "") ?: ""

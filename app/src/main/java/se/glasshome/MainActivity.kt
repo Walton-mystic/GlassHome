@@ -33,6 +33,11 @@ class MainActivity : Activity() {
     private lateinit var weatherDays: LinearLayout
     private lateinit var prefs: Prefs
     private var loadingPainting = false
+    private var hidden = false
+    private val fadeViews by lazy {
+        listOf<View>(menu, findViewById(R.id.clockBox), weather, caption)
+    }
+    private val hideRunnable = Runnable { fadeOut() }
 
     private val tick = object : Runnable {
         override fun run() {
@@ -75,12 +80,35 @@ class MainActivity : Activity() {
         renderWeatherFromCache()
         ui.removeCallbacks(tick); ui.post(tick)
         ui.removeCallbacks(slow); ui.post(slow)
+        fadeIn(immediate = true)
     }
 
     override fun onPause() {
         super.onPause()
         ui.removeCallbacks(tick)
         ui.removeCallbacks(slow)
+        ui.removeCallbacks(hideRunnable)
+    }
+
+    /** Restart the countdown that fades everything away when the remote is left alone. */
+    private fun scheduleHide() {
+        ui.removeCallbacks(hideRunnable)
+        val secs = prefs.idleSeconds
+        if (secs > 0) ui.postDelayed(hideRunnable, secs * 1000L)
+    }
+
+    private fun fadeOut() {
+        hidden = true
+        for (v in fadeViews) v.animate().alpha(0f).setDuration(1200).start()
+    }
+
+    private fun fadeIn(immediate: Boolean = false) {
+        hidden = false
+        for (v in fadeViews) {
+            v.animate().cancel()
+            if (immediate) v.alpha = 1f else v.animate().alpha(1f).setDuration(350).start()
+        }
+        scheduleHide()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -95,6 +123,12 @@ class MainActivity : Activity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (hidden) {
+            // First press only wakes the screen; it doesn't move or open anything.
+            if (event.action == KeyEvent.ACTION_DOWN) fadeIn()
+            return true
+        }
+        if (event.action == KeyEvent.ACTION_DOWN) scheduleHide()
         if (event.keyCode == KeyEvent.KEYCODE_BACK) return true
         return super.dispatchKeyEvent(event)
     }

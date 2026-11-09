@@ -13,7 +13,7 @@ object Net {
         c.connectTimeout = 15000
         c.readTimeout = 30000
         c.instanceFollowRedirects = true
-        c.setRequestProperty("User-Agent", "GlassHome/${BuildConfig.VERSION_NAME} (Android TV)")
+        c.setRequestProperty("User-Agent", "GlassHome/${BuildConfig.VERSION_NAME} (Android TV home screen; https://github.com/Walton-mystic/GlassHome)")
         c.setRequestProperty("AIC-User-Agent", "GlassHome (personal TV home screen)")
         return c
     }
