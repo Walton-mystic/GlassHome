@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/painting"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:importantForAccessibility="no" />
+
+    <View android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="#8C0A0D16" />
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/Shadowed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="54dp"
+        android:layout_marginTop="44dp"
+        android:fontFamily="sans-serif-thin"
+        android:textSize="32sp" />
+
+    <TextView
+        android:id="@+id/clock"
+        style="@style/Shadowed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="52dp"
+        android:alpha="0.9"
+        android:fontFamily="sans-serif-light"
+        android:textSize="20sp" />
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="440dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="110dp"
+        android:layout_marginBottom="30dp"
+        android:clipToPadding="false"
+        android:fadingEdgeLength="40dp"
+        android:requiresFadingEdge="vertical"
+        android:scrollbars="none">
+        <LinearLayout
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp" />
+    </ScrollView>
+</FrameLayout>
