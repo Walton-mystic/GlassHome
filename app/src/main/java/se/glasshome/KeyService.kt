@@ -20,6 +20,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.rtsp.RtspMediaSource
 
@@ -141,7 +144,19 @@ class KeyService : AccessibilityService() {
         val load = DefaultLoadControl.Builder()
             .setBufferDurationsMs(500, 2000, 250, 500)
             .build()
-        val p = ExoPlayer.Builder(this).setLoadControl(load).build()
+        // Use the TV's software decoders for the small window, so the hardware decoder
+        // stays free for whatever is playing full screen (GlassTV, Netflix, live TV …).
+        val softwareFirst = MediaCodecSelector { mime, secure, tunneling ->
+            val all = MediaCodecUtil.getDecoderInfos(mime, secure, tunneling)
+            val sw = all.filter {
+                it.softwareOnly || it.name.startsWith("c2.android.") || it.name.startsWith("OMX.google.")
+            }
+            sw + all.filter { it !in sw }
+        }
+        val renderers = DefaultRenderersFactory(this)
+            .setMediaCodecSelector(softwareFirst)
+            .setEnableDecoderFallback(true)
+        val p = ExoPlayer.Builder(this, renderers).setLoadControl(load).build()
         p.setVideoTextureView(texture)
         p.volume = if (muted) 0f else 1f
         p.addListener(object : Player.Listener {
@@ -150,7 +165,7 @@ class KeyService : AccessibilityService() {
             }
             override fun onPlayerError(error: PlaybackException) {
                 status?.visibility = View.VISIBLE
-                status?.text = "Babyvakten svarar inte – försöker igen…"
+                status?.text = "Babyvakten svarar inte (${error.errorCodeName}) – försöker igen…"
                 ui.postDelayed({ if (player === p) prepare(p) }, 4000)
             }
         })
