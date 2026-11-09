@@ -1,0 +1,54 @@
+name: Bygg GlassHome
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Packa upp ny källkod (om en bundle laddats upp)
+        run: |
+          if [ -f bundle.b64 ]; then
+            base64 -d bundle.b64 > bundle.tgz
+            tar xzf bundle.tgz
+            rm -f bundle.b64 bundle.tgz
+            git config user.name "GlassHome bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A
+            git commit -m "Packa upp källkod" || true
+            git push
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Bygg APK
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Döp om APK
+        run: cp app/build/outputs/apk/release/app-release.apk GlassHome.apk
+
+      - name: Skapa release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: GlassHome 1.0.${{ github.run_number }}
+          body: Automatiskt bygge
+          files: GlassHome.apk
+          make_latest: true
