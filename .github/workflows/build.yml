@@ -23,7 +23,10 @@ jobs:
             echo "::error::Lägg till hemligheten SIGNING_KEY under Settings > Secrets and variables > Actions"
             exit 1
           fi
-          echo "$SIGNING_KEY" | base64 -d > app/glasshome.jks
+          printf '%s' "$SIGNING_KEY" | tr -cd 'A-Za-z0-9+/=' > key.b64
+          echo "Nyckelns längd (tecken): $(wc -c < key.b64)"
+          base64 -d key.b64 > app/glasshome.jks || { echo "::error::Nyckeln gick inte att läsa. Klistra in hela innehållet i SIGNING_KEY.txt igen."; exit 1; }
+          rm key.b64
 
       - uses: actions/setup-java@v4
         with:
