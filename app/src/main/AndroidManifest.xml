@@ -55,6 +55,11 @@
             android:exported="false"
             android:screenOrientation="landscape" />
 
+        <activity
+            android:name=".GalleryActivity"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+
         <service
             android:name=".WakeService"
             android:exported="false"
