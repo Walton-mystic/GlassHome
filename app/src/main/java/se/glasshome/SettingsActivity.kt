@@ -32,6 +32,12 @@ class SettingsActivity : Activity() {
         Updater.checkInBackground(this, force = true) { build(focusedIndex()) }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Back from the picture browser: show the new background and collection name.
+        if (::list.isInitialized) { Ui.showPainting(this, painting); build(focusedIndex()) }
+    }
+
     private fun focusedIndex() = (0 until list.childCount).firstOrNull { list.getChildAt(it).hasFocus() } ?: 0
 
     private fun row(label: String, detail: String? = null, action: () -> Unit) {
@@ -48,8 +54,7 @@ class SettingsActivity : Activity() {
             row("Installera uppdatering", "1.0.${prefs.updateVersion}") { Updater.install(this) }
         }
         row("Bakgrund", Art.current(prefs).name) {
-            prefs.collection = (prefs.collection + 1) % Art.collections.size
-            nextPainting()
+            startActivity(android.content.Intent(this, GalleryActivity::class.java))
         }
         row("Byt bild nu") { nextPainting() }
         val rot = rotations.firstOrNull { it.first == prefs.rotateMinutes } ?: rotations[1]
